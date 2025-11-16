@@ -1,0 +1,8 @@
+{
+  "appTitle": "Yetim Yönetimi",
+  "children": "Çocuklar",
+  "register": "Kayıt",
+  "selectChildPrompt": "Detayları görüntülemek için bir çocuk seçin",
+  "childDetails": "Çocuk Detayları",
+  "moreFields": "Daha fazla alan burada..."
+}

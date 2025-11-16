@@ -1,0 +1,8 @@
+{
+  "appTitle": "Orphan Management",
+  "children": "Children",
+  "register": "Register",
+  "selectChildPrompt": "Select a child to view details",
+  "childDetails": "Child Details",
+  "moreFields": "More fields here..."
+}
