@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'pages/registration_form.dart'; // your existing page
 import 'models/child.dart'; // sample model (if available)
+import 'services/database_service.dart'; // Database service
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,14 @@ class AppLocalizations {
       'selectChildPrompt': 'Select a child to view details',
       'childDetails': 'Child Details',
       'moreFields': 'More fields here...',
+      'loading': 'Loading...',
+      'error': 'Error loading data',
+      'noChildren': 'No children found',
+      'edit': 'Edit',
+      'delete': 'Delete',
+      'confirm': 'Confirm',
+      'cancel': 'Cancel',
+      'deleteConfirm': 'Are you sure you want to delete this child?',
     },
     'ar': {
       'appTitle': 'ادارة الأيتام',
@@ -53,6 +62,14 @@ class AppLocalizations {
       'selectChildPrompt': 'اختر طفلاً لعرض التفاصيل',
       'childDetails': 'تفاصيل الطفل',
       'moreFields': 'المزيد من الحقول هنا...',
+      'loading': 'جاري التحميل...',
+      'error': 'خطأ في تحميل البيانات',
+      'noChildren': 'لم يتم العثور على أطفال',
+      'edit': 'تعديل',
+      'delete': 'حذف',
+      'confirm': 'تأكيد',
+      'cancel': 'إلغاء',
+      'deleteConfirm': 'هل أنت متأكد من رغبتك في حذف هذا الطفل؟',
     },
     'tr': {
       'appTitle': 'Yetim Yönetimi',
@@ -61,6 +78,14 @@ class AppLocalizations {
       'selectChildPrompt': 'Detayları görüntülemek için bir çocuk seçin',
       'childDetails': 'Çocuk Detayları',
       'moreFields': 'Daha fazla alan burada...',
+      'loading': 'Yükleniyor...',
+      'error': 'Veri yüklenirken hata oluştu',
+      'noChildren': 'Çocuk bulunamadı',
+      'edit': 'Düzenle',
+      'delete': 'Sil',
+      'confirm': 'Onayla',
+      'cancel': 'İptal',
+      'deleteConfirm': 'Bu çocuğu silmek istediğinizden emin misiniz?',
     },
   };
 
@@ -102,21 +127,53 @@ class DesktopShell extends StatefulWidget {
 class _DesktopShellState extends State<DesktopShell> {
   int _selectedIndex = 0;
   String? _selectedChildId;
+  late DatabaseService _dbService;
+  late Future<List<Child>> _childrenFuture;
 
-  // Example in-memory list — replace with storage service
-  final List<Map<String, String>> _children = List.generate(
-    12,
-    (i) => {
-      'id': 'child-${i + 1}',
-      'name': 'Child ${i + 1}',
-      'dob': '2015-0${(i % 9) + 1}-01',
-    },
-  );
+  @override
+  void initState() {
+    super.initState();
+    _dbService = DatabaseService();
+    _childrenFuture = _dbService.getAllChildren();
+  }
 
   void _openRegister() {
     Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => const RegistrationForm()));
+    ).push(MaterialPageRoute(builder: (_) => const RegistrationForm())).then((_) {
+      // Refresh the list after returning from registration
+      setState(() {
+        _childrenFuture = _dbService.getAllChildren();
+      });
+    });
+  }
+
+  void _deleteChild(String childId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context).get('deleteConfirm')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context).get('cancel')),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _dbService.deleteChild(childId);
+              if (mounted) {
+                Navigator.pop(context);
+                setState(() {
+                  _childrenFuture = _dbService.getAllChildren();
+                  _selectedChildId = null;
+                });
+              }
+            },
+            child: Text(AppLocalizations.of(context).get('confirm')),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -191,10 +248,16 @@ class _DesktopShellState extends State<DesktopShell> {
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: Text(
-                                    '${AppLocalizations.of(context).get('children')} (${_children.length})',
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
+                                  child: FutureBuilder<List<Child>>(
+                                    future: _childrenFuture,
+                                    builder: (context, snapshot) {
+                                      final count = snapshot.data?.length ?? 0;
+                                      return Text(
+                                        '${AppLocalizations.of(context).get('children')} ($count)',
+                                        style:
+                                            Theme.of(context).textTheme.titleLarge,
+                                      );
+                                    },
                                   ),
                                 ),
                                 ElevatedButton.icon(
@@ -211,51 +274,92 @@ class _DesktopShellState extends State<DesktopShell> {
                           ),
                           const Divider(height: 1),
                           Expanded(
-                            child: ListView.separated(
-                              padding: const EdgeInsets.all(8),
-                              itemCount: _children.length,
-                              separatorBuilder:
-                                  (_, __) => const Divider(height: 1),
-                              itemBuilder: (context, index) {
-                                final c = _children[index];
-                                final selected = c['id'] == _selectedChildId;
-                                return ListTile(
-                                  selected: selected,
-                                  leading: CircleAvatar(
-                                    child: Text('${index + 1}'),
-                                  ),
-                                  title: Text(c['name']!),
-                                  subtitle: Text('DOB: ${c['dob']}'),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.more_vert),
-                                    onPressed: () {
-                                      // context menu example
-                                      showModalBottomSheet(
-                                        context: context,
-                                        builder:
-                                            (_) => SafeArea(
-                                              child: Wrap(
-                                                children: [
-                                                  ListTile(
-                                                    leading: Icon(Icons.edit),
-                                                    title: Text('Edit'),
-                                                    onTap: () {},
-                                                  ),
-                                                  ListTile(
-                                                    leading: Icon(Icons.delete),
-                                                    title: Text('Delete'),
-                                                    onTap: () {},
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                      );
-                                    },
-                                  ),
-                                  onTap:
-                                      () => setState(
-                                        () => _selectedChildId = c['id'],
+                            child: FutureBuilder<List<Child>>(
+                              future: _childrenFuture,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return Center(
+                                    child: Text(
+                                      AppLocalizations.of(context).get('loading'),
+                                    ),
+                                  );
+                                }
+
+                                if (snapshot.hasError) {
+                                  return Center(
+                                    child: Text(
+                                      AppLocalizations.of(context).get('error'),
+                                    ),
+                                  );
+                                }
+
+                                final children = snapshot.data ?? [];
+
+                                if (children.isEmpty) {
+                                  return Center(
+                                    child: Text(
+                                      AppLocalizations.of(context).get('noChildren'),
+                                    ),
+                                  );
+                                }
+
+                                return ListView.separated(
+                                  padding: const EdgeInsets.all(8),
+                                  itemCount: children.length,
+                                  separatorBuilder:
+                                      (_, __) => const Divider(height: 1),
+                                  itemBuilder: (context, index) {
+                                    final c = children[index];
+                                    final selected = c.id == _selectedChildId;
+                                    return ListTile(
+                                      selected: selected,
+                                      leading: CircleAvatar(
+                                        child: Text('${index + 1}'),
                                       ),
+                                      title: Text(c.fullName),
+                                      subtitle: Text('ID: ${c.childIdNumber}'),
+                                      trailing: IconButton(
+                                        icon: const Icon(Icons.more_vert),
+                                        onPressed: () {
+                                          // context menu example
+                                          showModalBottomSheet(
+                                            context: context,
+                                            builder:
+                                                (_) => SafeArea(
+                                                  child: Wrap(
+                                                    children: [
+                                                      ListTile(
+                                                        leading: const Icon(Icons.edit),
+                                                        title: Text(
+                                                          AppLocalizations.of(context).get('edit'),
+                                                        ),
+                                                        onTap: () {
+                                                          Navigator.pop(context);
+                                                          // TODO: Implement edit functionality
+                                                        },
+                                                      ),
+                                                      ListTile(
+                                                        leading: const Icon(Icons.delete),
+                                                        title: Text(
+                                                          AppLocalizations.of(context).get('delete'),
+                                                        ),
+                                                        onTap: () {
+                                                          Navigator.pop(context);
+                                                          _deleteChild(c.id);
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                          );
+                                        },
+                                      ),
+                                      onTap:
+                                          () => setState(
+                                            () => _selectedChildId = c.id,
+                                          ),
+                                    );
+                                  },
                                 );
                               },
                             ),
@@ -279,32 +383,59 @@ class _DesktopShellState extends State<DesktopShell> {
                                     ).get('selectChildPrompt'),
                                   ),
                                 )
-                                : Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        AppLocalizations.of(
-                                          context,
-                                        ).get('childDetails'),
-                                        style:
-                                            Theme.of(
+                                : FutureBuilder<Child?>(
+                                  future: _dbService.getChild(_selectedChildId!),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return Center(
+                                        child: Text(
+                                          AppLocalizations.of(context).get('loading'),
+                                        ),
+                                      );
+                                    }
+
+                                    if (!snapshot.hasData) {
+                                      return Center(
+                                        child: Text(
+                                          AppLocalizations.of(context).get('error'),
+                                        ),
+                                      );
+                                    }
+
+                                    final child = snapshot.data!;
+                                    return Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            AppLocalizations.of(
                                               context,
-                                            ).textTheme.headlineSmall,
+                                            ).get('childDetails'),
+                                            style:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.headlineSmall,
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Text('Full Name: ${child.fullName}'),
+                                          const SizedBox(height: 8),
+                                          Text('ID: ${child.childIdNumber}'),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'DOB: ${child.dateOfBirth?.toString() ?? 'N/A'}',
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text('Father: ${child.fatherName}'),
+                                          const SizedBox(height: 8),
+                                          Text('Mother: ${child.motherName}'),
+                                          const SizedBox(height: 8),
+                                          Text('Health: ${child.healthStatus}'),
+                                        ],
                                       ),
-                                      const SizedBox(height: 12),
-                                      Text('ID: $_selectedChildId'),
-                                      const SizedBox(height: 8),
-                                      // Replace with actual fields/photos
-                                      Text(
-                                        AppLocalizations.of(
-                                          context,
-                                        ).get('moreFields'),
-                                      ),
-                                    ],
-                                  ),
+                                    );
+                                  },
                                 ),
                       ),
                     ),
