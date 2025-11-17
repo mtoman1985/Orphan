@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'pages/registration_form.dart'; // your existing page
-import 'models/child.dart'; // sample model (if available)
-import 'services/database_service.dart'; // Database service
+import 'pages/registration_form.dart';
+import 'pages/sponsors_page.dart';
+import 'models/child.dart';
+import 'services/database_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +34,6 @@ class OrphanDesktopApp extends StatelessWidget {
   }
 }
 
-/// Minimal, manual localizations using the ARB files created under lib/l10n.
 class AppLocalizations {
   final Locale locale;
   AppLocalizations(this.locale);
@@ -138,10 +138,9 @@ class _DesktopShellState extends State<DesktopShell> {
   }
 
   void _openRegister() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const RegistrationForm())).then((_) {
-      // Refresh the list after returning from registration
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const RegistrationForm()))
+        .then((_) {
       setState(() {
         _childrenFuture = _dbService.getAllChildren();
       });
@@ -179,8 +178,6 @@ class _DesktopShellState extends State<DesktopShell> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-
-    // Responsive: show rail + list + details on wide screens
     final showDetailsPanel = width >= 1000;
     final showNavRail = width >= 600;
 
@@ -199,14 +196,13 @@ class _DesktopShellState extends State<DesktopShell> {
             ),
             PopupMenuButton<String>(
               onSelected: (v) {},
-              itemBuilder:
-                  (ctx) => const [
-                    PopupMenuItem(
-                      value: 'import',
-                      child: Text('Import Data...'),
-                    ),
-                    PopupMenuItem(value: 'settings', child: Text('Settings')),
-                  ],
+              itemBuilder: (ctx) => const [
+                PopupMenuItem(
+                  value: 'import',
+                  child: Text('Import Data...'),
+                ),
+                PopupMenuItem(value: 'settings', child: Text('Settings')),
+              ],
             ),
           ],
         ),
@@ -215,8 +211,7 @@ class _DesktopShellState extends State<DesktopShell> {
             if (showNavRail)
               NavigationRail(
                 selectedIndex: _selectedIndex,
-                onDestinationSelected:
-                    (i) => setState(() => _selectedIndex = i),
+                onDestinationSelected: (i) => setState(() => _selectedIndex = i),
                 labelType: NavigationRailLabelType.selected,
                 destinations: [
                   NavigationRailDestination(
@@ -229,11 +224,9 @@ class _DesktopShellState extends State<DesktopShell> {
                   ),
                 ],
               ),
-            // Main content area
             Expanded(
               child: Row(
                 children: [
-                  // Left: list
                   Flexible(
                     flex: showDetailsPanel ? 4 : 1,
                     child: Card(
@@ -264,9 +257,7 @@ class _DesktopShellState extends State<DesktopShell> {
                                   onPressed: _openRegister,
                                   icon: const Icon(Icons.add),
                                   label: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).get('register'),
+                                    AppLocalizations.of(context).get('register'),
                                   ),
                                 ),
                               ],
@@ -277,10 +268,12 @@ class _DesktopShellState extends State<DesktopShell> {
                             child: FutureBuilder<List<Child>>(
                               future: _childrenFuture,
                               builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
                                   return Center(
                                     child: Text(
-                                      AppLocalizations.of(context).get('loading'),
+                                      AppLocalizations.of(context)
+                                          .get('loading'),
                                     ),
                                   );
                                 }
@@ -288,7 +281,8 @@ class _DesktopShellState extends State<DesktopShell> {
                                 if (snapshot.hasError) {
                                   return Center(
                                     child: Text(
-                                      AppLocalizations.of(context).get('error'),
+                                      AppLocalizations.of(context)
+                                          .get('error'),
                                     ),
                                   );
                                 }
@@ -298,7 +292,8 @@ class _DesktopShellState extends State<DesktopShell> {
                                 if (children.isEmpty) {
                                   return Center(
                                     child: Text(
-                                      AppLocalizations.of(context).get('noChildren'),
+                                      AppLocalizations.of(context)
+                                          .get('noChildren'),
                                     ),
                                   );
                                 }
@@ -306,8 +301,8 @@ class _DesktopShellState extends State<DesktopShell> {
                                 return ListView.separated(
                                   padding: const EdgeInsets.all(8),
                                   itemCount: children.length,
-                                  separatorBuilder:
-                                      (_, __) => const Divider(height: 1),
+                                  separatorBuilder: (_, __) =>
+                                      const Divider(height: 1),
                                   itemBuilder: (context, index) {
                                     final c = children[index];
                                     final selected = c.id == _selectedChildId;
@@ -321,43 +316,45 @@ class _DesktopShellState extends State<DesktopShell> {
                                       trailing: IconButton(
                                         icon: const Icon(Icons.more_vert),
                                         onPressed: () {
-                                          // context menu example
                                           showModalBottomSheet(
                                             context: context,
-                                            builder:
-                                                (_) => SafeArea(
-                                                  child: Wrap(
-                                                    children: [
-                                                      ListTile(
-                                                        leading: const Icon(Icons.edit),
-                                                        title: Text(
-                                                          AppLocalizations.of(context).get('edit'),
-                                                        ),
-                                                        onTap: () {
-                                                          Navigator.pop(context);
-                                                          // TODO: Implement edit functionality
-                                                        },
-                                                      ),
-                                                      ListTile(
-                                                        leading: const Icon(Icons.delete),
-                                                        title: Text(
-                                                          AppLocalizations.of(context).get('delete'),
-                                                        ),
-                                                        onTap: () {
-                                                          Navigator.pop(context);
-                                                          _deleteChild(c.id);
-                                                        },
-                                                      ),
-                                                    ],
+                                            builder: (_) => SafeArea(
+                                              child: Wrap(
+                                                children: [
+                                                  ListTile(
+                                                    leading:
+                                                        const Icon(Icons.edit),
+                                                    title: Text(
+                                                      AppLocalizations.of(
+                                                              context)
+                                                          .get('edit'),
+                                                    ),
+                                                    onTap: () {
+                                                      Navigator.pop(context);
+                                                    },
                                                   ),
-                                                ),
+                                                  ListTile(
+                                                    leading: const Icon(
+                                                        Icons.delete),
+                                                    title: Text(
+                                                      AppLocalizations.of(
+                                                              context)
+                                                          .get('delete'),
+                                                    ),
+                                                    onTap: () {
+                                                      Navigator.pop(context);
+                                                      _deleteChild(c.id);
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           );
                                         },
                                       ),
-                                      onTap:
-                                          () => setState(
-                                            () => _selectedChildId = c.id,
-                                          ),
+                                      onTap: () => setState(
+                                        () => _selectedChildId = c.id,
+                                      ),
                                     );
                                   },
                                 );
@@ -368,75 +365,189 @@ class _DesktopShellState extends State<DesktopShell> {
                       ),
                     ),
                   ),
-                  // Right: details (visible on wide screens)
                   if (showDetailsPanel)
                     Flexible(
                       flex: 6,
                       child: Card(
                         margin: const EdgeInsets.all(12),
-                        child:
-                            _selectedChildId == null
-                                ? Center(
-                                  child: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).get('selectChildPrompt'),
-                                  ),
-                                )
-                                : FutureBuilder<Child?>(
-                                  future: _dbService.getChild(_selectedChildId!),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return Center(
-                                        child: Text(
-                                          AppLocalizations.of(context).get('loading'),
-                                        ),
-                                      );
-                                    }
+                        child: _selectedChildId == null
+                            ? Center(
+                                child: Text(
+                                  AppLocalizations.of(context)
+                                      .get('selectChildPrompt'),
+                                ),
+                              )
+                            : FutureBuilder<Child?>(
+                                future:
+                                    _dbService.getChild(_selectedChildId!),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Center(
+                                      child: Text(
+                                        AppLocalizations.of(context)
+                                            .get('loading'),
+                                      ),
+                                    );
+                                  }
 
-                                    if (!snapshot.hasData) {
-                                      return Center(
-                                        child: Text(
-                                          AppLocalizations.of(context).get('error'),
-                                        ),
-                                      );
-                                    }
+                                  if (!snapshot.hasData) {
+                                    return Center(
+                                      child: Text(
+                                        AppLocalizations.of(context)
+                                            .get('error'),
+                                      ),
+                                    );
+                                  }
 
-                                    final child = snapshot.data!;
-                                    return Padding(
-                                      padding: const EdgeInsets.all(16),
+                                  final child = snapshot.data!;
+                                  return Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: SingleChildScrollView(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text(
-                                            AppLocalizations.of(
-                                              context,
-                                            ).get('childDetails'),
-                                            style:
-                                                Theme.of(
-                                                  context,
-                                                ).textTheme.headlineSmall,
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment
+                                                    .spaceBetween,
+                                            children: [
+                                              Text(
+                                                AppLocalizations.of(context)
+                                                    .get('childDetails'),
+                                                style: Theme.of(context)
+                                                    .textTheme.headlineSmall,
+                                              ),
+                                              ElevatedButton.icon(
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          SponsorsPage(
+                                                            childId: child.id,
+                                                          ),
+                                                    ),
+                                                  ).then((_) {
+                                                    setState(() {
+                                                      _childrenFuture =
+                                                          _dbService
+                                                              .getAllChildren();
+                                                    });
+                                                  });
+                                                },
+                                                icon: const Icon(
+                                                    Icons.person_add),
+                                                label: const Text(
+                                                    'Link Sponsor'),
+                                              ),
+                                            ],
                                           ),
                                           const SizedBox(height: 12),
-                                          Text('Full Name: ${child.fullName}'),
+                                          Text(
+                                              'Full Name: ${child.fullName}'),
                                           const SizedBox(height: 8),
                                           Text('ID: ${child.childIdNumber}'),
                                           const SizedBox(height: 8),
                                           Text(
-                                            'DOB: ${child.dateOfBirth?.toString() ?? 'N/A'}',
+                                              'DOB: ${child.dateOfBirth?.toString() ?? 'N/A'}'),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                              'Father: ${child.fatherName}'),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                              'Mother: ${child.motherName}'),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                              'Health: ${child.healthStatus}'),
+                                          const SizedBox(height: 16),
+                                          const Divider(),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Sponsor Information',
+                                            style: Theme.of(context)
+                                                .textTheme.titleMedium,
                                           ),
                                           const SizedBox(height: 8),
-                                          Text('Father: ${child.fatherName}'),
-                                          const SizedBox(height: 8),
-                                          Text('Mother: ${child.motherName}'),
-                                          const SizedBox(height: 8),
-                                          Text('Health: ${child.healthStatus}'),
+                                          FutureBuilder<dynamic>(
+                                            future: _dbService
+                                                .getChildSponsor(child.id),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.connectionState ==
+                                                  ConnectionState.waiting) {
+                                                return const Text(
+                                                    'Loading...');
+                                              }
+
+                                              if (snapshot.data == null) {
+                                                return const Text(
+                                                  'No sponsor linked',
+                                                  style: TextStyle(
+                                                    fontStyle:
+                                                        FontStyle.italic,
+                                                  ),
+                                                );
+                                              }
+
+                                              final sponsor =
+                                                  snapshot.data;
+                                              return Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment
+                                                        .start,
+                                                children: [
+                                                  Text(
+                                                      'Name: ${sponsor.name}'),
+                                                  const SizedBox(height: 4),
+                                                  if (sponsor.email != null)
+                                                    Text(
+                                                        'Email: ${sponsor.email}'),
+                                                  if (sponsor.phone != null)
+                                                    const SizedBox(height: 4),
+                                                  if (sponsor.phone != null)
+                                                    Text(
+                                                        'Phone: ${sponsor.phone}'),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                      'Monthly Amount: \$${sponsor.amount.toStringAsFixed(2)}'),
+                                                  const SizedBox(height: 12),
+                                                  ElevatedButton.icon(
+                                                    onPressed: () async {
+                                                      await _dbService
+                                                          .unlinkSponsorFromChild(
+                                                            child.id,
+                                                          );
+                                                      if (mounted) {
+                                                        setState(() {
+                                                          _childrenFuture =
+                                                              _dbService
+                                                                  .getAllChildren();
+                                                        });
+                                                      }
+                                                    },
+                                                    icon: const Icon(
+                                                        Icons.delete),
+                                                    label: const Text(
+                                                        'Unlink Sponsor'),
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor:
+                                                          Colors.red,
+                                                      foregroundColor:
+                                                          Colors.white,
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          ),
                                         ],
                                       ),
-                                    );
-                                  },
-                                ),
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
                     ),
                 ],

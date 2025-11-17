@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:async';
 import '../models/child.dart';
+import '../models/sponsor.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
@@ -46,7 +47,7 @@ class DatabaseService {
         disabilityType TEXT,
         siblings TEXT,
         documents TEXT,
-        sponsor TEXT,
+        sponsorId TEXT,
         createdAt TEXT NOT NULL
       )
     ''');
@@ -56,6 +57,9 @@ class DatabaseService {
       CREATE TABLE sponsors (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
+        amount REAL DEFAULT 0.0,
+        startDate TEXT NOT NULL,
+        relationship TEXT,
         email TEXT,
         phone TEXT,
         address TEXT,
@@ -78,7 +82,6 @@ class DatabaseService {
 
   // ===== Children Operations =====
 
-  /// Insert a new child into the database
   Future<void> insertChild(Child child) async {
     final db = await database;
     await db.insert(
@@ -97,14 +100,13 @@ class DatabaseService {
         'disabilityType': child.disabilityType,
         'siblings': child.siblings.toString(),
         'documents': child.documents.map((d) => d.toJson()).toString(),
-        'sponsor': child.sponsor?.toJson().toString(),
+        'sponsorId': child.sponsor?.id,
         'createdAt': child.createdAt.toIso8601String(),
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  /// Get all children from the database
   Future<List<Child>> getAllChildren() async {
     final db = await database;
     final maps = await db.query('children');
@@ -128,7 +130,6 @@ class DatabaseService {
     });
   }
 
-  /// Get a specific child by ID
   Future<Child?> getChild(String id) async {
     final db = await database;
     final maps = await db.query(
@@ -158,7 +159,6 @@ class DatabaseService {
     );
   }
 
-  /// Update an existing child
   Future<void> updateChild(Child child) async {
     final db = await database;
     await db.update(
@@ -174,13 +174,13 @@ class DatabaseService {
         'motherStatus': child.motherStatus,
         'healthStatus': child.healthStatus,
         'disabilityType': child.disabilityType,
+        'sponsorId': child.sponsor?.id,
       },
       where: 'id = ?',
       whereArgs: [child.id],
     );
   }
 
-  /// Delete a child by ID
   Future<void> deleteChild(String id) async {
     final db = await database;
     await db.delete(
@@ -190,7 +190,6 @@ class DatabaseService {
     );
   }
 
-  /// Search children by name
   Future<List<Child>> searchChildren(String query) async {
     final db = await database;
     final maps = await db.query(
@@ -219,7 +218,132 @@ class DatabaseService {
     });
   }
 
-  /// Close the database
+  // ===== Sponsors Operations =====
+
+  Future<void> insertSponsor(Sponsor sponsor) async {
+    final db = await database;
+    await db.insert(
+      'sponsors',
+      {
+        'id': sponsor.id,
+        'name': sponsor.name,
+        'amount': sponsor.amount,
+        'startDate': sponsor.startDate.toIso8601String(),
+        'relationship': sponsor.relationship,
+        'email': sponsor.email,
+        'phone': sponsor.phone,
+        'address': sponsor.address,
+        'createdAt': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Sponsor>> getAllSponsors() async {
+    final db = await database;
+    final maps = await db.query('sponsors');
+    return List.generate(maps.length, (i) {
+      return Sponsor(
+        id: maps[i]['id'] as String,
+        name: maps[i]['name'] as String,
+        amount: (maps[i]['amount'] as num?)?.toDouble() ?? 0.0,
+        startDate: DateTime.parse(maps[i]['startDate'] as String),
+        relationship: maps[i]['relationship'] as String? ?? '',
+        email: maps[i]['email'] as String?,
+        phone: maps[i]['phone'] as String?,
+        address: maps[i]['address'] as String?,
+      );
+    });
+  }
+
+  Future<Sponsor?> getSponsor(String id) async {
+    final db = await database;
+    final maps = await db.query(
+      'sponsors',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isEmpty) return null;
+
+    final map = maps.first;
+    return Sponsor(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
+      startDate: DateTime.parse(map['startDate'] as String),
+      relationship: map['relationship'] as String? ?? '',
+      email: map['email'] as String?,
+      phone: map['phone'] as String?,
+      address: map['address'] as String?,
+    );
+  }
+
+  Future<void> updateSponsor(Sponsor sponsor) async {
+    final db = await database;
+    await db.update(
+      'sponsors',
+      {
+        'name': sponsor.name,
+        'amount': sponsor.amount,
+        'startDate': sponsor.startDate.toIso8601String(),
+        'relationship': sponsor.relationship,
+        'email': sponsor.email,
+        'phone': sponsor.phone,
+        'address': sponsor.address,
+      },
+      where: 'id = ?',
+      whereArgs: [sponsor.id],
+    );
+  }
+
+  Future<void> deleteSponsor(String id) async {
+    final db = await database;
+    await db.delete(
+      'sponsors',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // ===== Link/Unlink Sponsor to Child =====
+
+  Future<void> linkSponsorToChild(String childId, String sponsorId) async {
+    final db = await database;
+    await db.update(
+      'children',
+      {'sponsorId': sponsorId},
+      where: 'id = ?',
+      whereArgs: [childId],
+    );
+  }
+
+  Future<void> unlinkSponsorFromChild(String childId) async {
+    final db = await database;
+    await db.update(
+      'children',
+      {'sponsorId': null},
+      where: 'id = ?',
+      whereArgs: [childId],
+    );
+  }
+
+  Future<Sponsor?> getChildSponsor(String childId) async {
+    final db = await database;
+    final maps = await db.query(
+      'children',
+      where: 'id = ?',
+      whereArgs: [childId],
+    );
+
+    if (maps.isEmpty) return null;
+
+    final sponsorId = maps.first['sponsorId'] as String?;
+    if (sponsorId == null) return null;
+
+    return getSponsor(sponsorId);
+  }
+
   Future<void> closeDatabase() async {
     final db = await database;
     await db.close();
