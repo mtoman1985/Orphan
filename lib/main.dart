@@ -20,7 +20,7 @@ class OrphanDesktopApp extends StatelessWidget {
       title: 'Orphan Management (Desktop)',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
       ),
       localizationsDelegates: [
         const _AppLocalizationsDelegate(),
@@ -218,10 +218,7 @@ class _DesktopShellState extends State<DesktopShell> {
                     icon: const Icon(Icons.list),
                     label: Text(AppLocalizations.of(context).get('children')),
                   ),
-                  NavigationRailDestination(
-                    icon: const Icon(Icons.report),
-                    label: const Text('Reports'),
-                  ),
+                  
                 ],
               ),
             Expanded(
