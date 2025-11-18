@@ -331,6 +331,21 @@ class _DesktopShellState extends State<DesktopShell> {
                                                     ),
                                                     onTap: () {
                                                       Navigator.pop(context);
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (_) =>
+                                                              EditChildPage(
+                                                                child: c,
+                                                              ),
+                                                        ),
+                                                      ).then((_) {
+                                                        setState(() {
+                                                          _childrenFuture =
+                                                              _dbService
+                                                                  .getAllChildren();
+                                                        });
+                                                      });
                                                     },
                                                   ),
                                                   ListTile(
