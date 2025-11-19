@@ -80,6 +80,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
           _sponsorNameCtl.text.trim().isEmpty
               ? null
               : Sponsor(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
                 name: _sponsorNameCtl.text.trim(),
                 amount: double.tryParse(_sponsorAmountCtl.text.trim()) ?? 0.0,
                 startDate: _sponsorStart ?? DateTime.now(),

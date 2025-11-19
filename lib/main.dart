@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'pages/registration_form.dart';
 import 'pages/sponsors_page.dart';
+import 'pages/edit_child_page.dart';
 import 'models/child.dart';
 import 'services/database_service.dart';
 
