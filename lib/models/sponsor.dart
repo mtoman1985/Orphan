@@ -11,7 +11,7 @@ class Sponsor {
   String? address;
 
   Sponsor({
-    required this.id,
+    this.id = '',
     required this.name,
     required this.amount,
     required this.startDate,
