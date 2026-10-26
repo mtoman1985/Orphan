@@ -1,5 +1,10 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.14...3.30)
 project(runner LANGUAGES CXX)
+
+# Add /FS flag to fix concurrent PDB writes
+if(MSVC)
+  add_compile_options(/FS)
+endif()
 
 # Define the application target. To change its name, change BINARY_NAME in the
 # top-level CMakeLists.txt, not the value here, or `flutter run` will no longer

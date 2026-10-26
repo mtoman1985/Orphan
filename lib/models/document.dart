@@ -6,6 +6,7 @@ class Document {
   String filePath; // stored path in app data
   String type; // e.g., photo, birth_certificate, id_photo, medical_report
   DateTime uploadedAt;
+  DateTime updatedAt;
 
   Document({
     required this.id,
@@ -13,7 +14,9 @@ class Document {
     required this.filePath,
     this.type = '',
     DateTime? uploadedAt,
-  }) : uploadedAt = uploadedAt ?? DateTime.now();
+    DateTime? updatedAt,
+  }) : uploadedAt = uploadedAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? uploadedAt ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -21,6 +24,7 @@ class Document {
     'filePath': filePath,
     'type': type,
     'uploadedAt': uploadedAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
   };
 
   factory Document.fromJson(Map<String, dynamic> j) => Document(
@@ -32,6 +36,12 @@ class Document {
         j['uploadedAt'] != null
             ? DateTime.parse(j['uploadedAt'] as String)
             : DateTime.now(),
+    updatedAt:
+        j['updatedAt'] != null
+            ? DateTime.parse(j['updatedAt'] as String)
+            : (j['uploadedAt'] != null
+                ? DateTime.parse(j['uploadedAt'] as String)
+                : DateTime.now()),
   );
 
   String toRawJson() => json.encode(toJson());
