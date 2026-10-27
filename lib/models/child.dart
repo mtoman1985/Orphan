@@ -95,8 +95,9 @@ class Child {
 
   Child({
     required this.id,
-    required this.firstName,
-    required this.lastName,
+    String? firstName,
+    String? lastName,
+    String? fullName,
     this.nationalId,
     this.dateOfBirth,
     required this.childIdNumber,
@@ -150,7 +151,9 @@ class Child {
     this.bankAccountHolderName,
     this.schoolName,
     this.isSynced = false,
-  }) : siblings = siblings ?? [],
+  }) : firstName = firstName ?? (fullName != null && fullName.trim().isNotEmpty ? fullName.trim().split(RegExp(r'\s+')).first : ''),
+       lastName = lastName ?? (fullName != null && fullName.trim().isNotEmpty && fullName.trim().split(RegExp(r'\s+')).length > 1 ? fullName.trim().split(RegExp(r'\s+')).sublist(1).join(' ') : ''),
+       siblings = siblings ?? [],
        documents = documents ?? [],
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? createdAt ?? DateTime.now();
