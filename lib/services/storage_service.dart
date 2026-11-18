@@ -3,6 +3,7 @@ import 'dart:io' show File, Directory;
 import 'dart:convert';
 
 import 'package:uuid/uuid.dart';
+import 'package:path/path.dart' as p;
 
 import '../models/child.dart';
 import '../models/document.dart';
@@ -61,10 +62,16 @@ class StorageService {
     File src, {
     required String type,
     String? customFileName,
+    String? relativeFolder,
   }) async {
     if (kIsWeb) throw UnsupportedError('File saving is not supported on web');
     final base = await getBaseDir();
-    final filesDir = Directory('${base.path}/files');
+    final folderParts =
+        (relativeFolder ?? '')
+            .split(RegExp(r'[/\\]'))
+            .where((part) => part.isNotEmpty && part != '.' && part != '..')
+            .toList();
+    final filesDir = Directory(p.joinAll([base.path, 'files', ...folderParts]));
     if (!await filesDir.exists()) await filesDir.create(recursive: true);
     final id = Uuid().v4();
 

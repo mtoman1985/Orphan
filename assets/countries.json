@@ -1,0 +1,200 @@
+[
+  {
+    "name_ar": "السعودية",
+    "name_en": "Saudi Arabia",
+    "name_tr": "Suudi Arabistan",
+    "code": "SA"
+  },
+  {
+    "name_ar": "الإمارات العربية المتحدة",
+    "name_en": "United Arab Emirates",
+    "name_tr": "Birleşik Arap Emirlikleri",
+    "code": "AE"
+  },
+  {
+    "name_ar": "مصر",
+    "name_en": "Egypt",
+    "name_tr": "Mısır",
+    "code": "EG"
+  },
+  {
+    "name_ar": "الأردن",
+    "name_en": "Jordan",
+    "name_tr": "Ürdün",
+    "code": "JO"
+  },
+  {
+    "name_ar": "فلسطين",
+    "name_en": "Palestine",
+    "name_tr": "Filistin",
+    "code": "PS"
+  },
+  {
+    "name_ar": "لبنان",
+    "name_en": "Lebanon",
+    "name_tr": "Lübnan",
+    "code": "LB"
+  },
+  {
+    "name_ar": "سوريا",
+    "name_en": "Syria",
+    "name_tr": "Suriye",
+    "code": "SY"
+  },
+  {
+    "name_ar": "العراق",
+    "name_en": "Iraq",
+    "name_tr": "Irak",
+    "code": "IQ"
+  },
+  {
+    "name_ar": "اليمن",
+    "name_en": "Yemen",
+    "name_tr": "Yemen",
+    "code": "YE"
+  },
+  {
+    "name_ar": "عمان",
+    "name_en": "Oman",
+    "name_tr": "Umman",
+    "code": "OM"
+  },
+  {
+    "name_ar": "قطر",
+    "name_en": "Qatar",
+    "name_tr": "Katar",
+    "code": "QA"
+  },
+  {
+    "name_ar": "البحرين",
+    "name_en": "Bahrain",
+    "name_tr": "Bahreyn",
+    "code": "BH"
+  },
+  {
+    "name_ar": "الكويت",
+    "name_en": "Kuwait",
+    "name_tr": "Kuveyt",
+    "code": "KW"
+  },
+  {
+    "name_ar": "تركيا",
+    "name_en": "Turkey",
+    "name_tr": "Türkiye",
+    "code": "TR"
+  },
+  {
+    "name_ar": "إيران",
+    "name_en": "Iran",
+    "name_tr": "İran",
+    "code": "IR"
+  },
+  {
+    "name_ar": "باكستان",
+    "name_en": "Pakistan",
+    "name_tr": "Pakistan",
+    "code": "PK"
+  },
+  {
+    "name_ar": "أفغانستان",
+    "name_en": "Afghanistan",
+    "name_tr": "Afganistan",
+    "code": "AF"
+  },
+  {
+    "name_ar": "المغرب",
+    "name_en": "Morocco",
+    "name_tr": "Fas",
+    "code": "MA"
+  },
+  {
+    "name_ar": "الجزائر",
+    "name_en": "Algeria",
+    "name_tr": "Cezayir",
+    "code": "DZ"
+  },
+  {
+    "name_ar": "تونس",
+    "name_en": "Tunisia",
+    "name_tr": "Tunus",
+    "code": "TN"
+  },
+  {
+    "name_ar": "ليبيا",
+    "name_en": "Libya",
+    "name_tr": "Libya",
+    "code": "LY"
+  },
+  {
+    "name_ar": "السودان",
+    "name_en": "Sudan",
+    "name_tr": "Sudan",
+    "code": "SD"
+  },
+  {
+    "name_ar": "جيبوتي",
+    "name_en": "Djibouti",
+    "name_tr": "Cibuti",
+    "code": "DJ"
+  },
+  {
+    "name_ar": "الصومال",
+    "name_en": "Somalia",
+    "name_tr": "Somali",
+    "code": "SO"
+  },
+  {
+    "name_ar": "بريطانيا",
+    "name_en": "United Kingdom",
+    "name_tr": "Birleşik Krallık",
+    "code": "GB"
+  },
+  {
+    "name_ar": "فرنسا",
+    "name_en": "France",
+    "name_tr": "Fransa",
+    "code": "FR"
+  },
+  {
+    "name_ar": "ألمانيا",
+    "name_en": "Germany",
+    "name_tr": "Almanya",
+    "code": "DE"
+  },
+  {
+    "name_ar": "إيطاليا",
+    "name_en": "Italy",
+    "name_tr": "İtalya",
+    "code": "IT"
+  },
+  {
+    "name_ar": "إسبانيا",
+    "name_en": "Spain",
+    "name_tr": "İspanya",
+    "code": "ES"
+  },
+  {
+    "name_ar": "الولايات المتحدة",
+    "name_en": "United States",
+    "name_tr": "Birleşik Devletler",
+    "code": "US"
+  },
+  {
+    "name_ar": "كندا",
+    "name_en": "Canada",
+    "name_tr": "Kanada",
+    "code": "CA"
+  },
+  {
+    "name_ar": "أستراليا",
+    "name_en": "Australia",
+    "name_tr": "Avustralya",
+    "code": "AU"
+  },
+  {
+    "name_ar": "نيوزيلندا",
+    "name_en": "New Zealand",
+    "name_tr": "Yeni Zelanda",
+    "code": "NZ"
+  }
+]

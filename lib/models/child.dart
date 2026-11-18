@@ -7,6 +7,7 @@ class Child {
   String id;
   String firstName;
   String lastName;
+  String? grandfatherName;
   DateTime? dateOfBirth;
   String childIdNumber;
   String? nationalId;
@@ -48,7 +49,13 @@ class Child {
   String? city;
   String? street;
 
+  // Place of Birth
+  String? birthCountry;
+  String? birthCity;
+
   // Guardian details
+  String? guardianName;
+  String? guardianAddress;
   String? guardianRelationship;
   String? guardianPhone; // include country code prefix
 
@@ -58,15 +65,22 @@ class Child {
   grade; // e.g., "1st Grade", "7th Grade" (mapped from school class keys)
   String?
   universityYear; // e.g., "First Year", "Second Year", etc. (for University)
+  String? universityName;
   String?
   universityCollegeName; // e.g., "Faculty of Medicine", "School of Engineering"
+  String? collegeSpecialization;
   String? schoolName; // e.g., "Al-Aqsa School"
 
-  // Bank Account Details
+  // Financial / Payment Details
+  String? paymentMethod; // 'bank' or 'wallet'
   String? bankName;
   String? bankAccountNumber;
   String? bankIban;
   String? bankAccountHolderName;
+  String? walletName; // optional/custom wallet name
+  String?
+  walletNumber; // linked mobile number (used for both bank and wallet mobile)
+  String? walletHolderName; // wallet holder name
 
   // Sponsor link date
   DateTime? sponsorLinkedAt;
@@ -87,7 +101,28 @@ class Child {
   bool isSynced;
 
   // Backwards compatibility: many UI call-sites still use `fullName`.
-  String get fullName => '$firstName $fatherName $lastName';
+  String get fullName {
+    final parts =
+        [
+          firstName,
+          fatherName,
+          if (grandfatherName != null && grandfatherName!.trim().isNotEmpty)
+            grandfatherName!,
+          lastName,
+        ].where((s) => s.trim().isNotEmpty).toList();
+    return parts.join(' ');
+  }
+
+  String get fatherTripleName {
+    final parts =
+        [
+          fatherName,
+          if (grandfatherName != null && grandfatherName!.trim().isNotEmpty)
+            grandfatherName!,
+          lastName,
+        ].where((s) => s.trim().isNotEmpty).toList();
+    return parts.join(' ');
+  }
 
   bool get isSponsored =>
       sponsor != null && sponsor!.name.trim().isNotEmpty && sponsor!.isOngoing;
@@ -98,20 +133,27 @@ class Child {
     String? firstName,
     String? lastName,
     String? fullName,
+    String? grandfatherName,
+    this.birthCountry,
+    this.birthCity,
     this.nationalId,
     this.dateOfBirth,
     required this.childIdNumber,
     this.country,
     this.city,
     this.street,
+    this.guardianName,
+    this.guardianAddress,
     this.guardianRelationship,
     this.guardianPhone,
     this.educationLevel,
     this.grade,
     this.universityYear,
+    this.universityName,
     this.universityCollegeName,
+    this.collegeSpecialization,
     this.sponsorLinkedAt,
-    this.fatherName = '',
+    String fatherName = '',
     this.fatherIdNumber = '',
     this.fatherStatus = 'Alive',
     this.fatherDeathDate,
@@ -145,14 +187,42 @@ class Child {
     DateTime? updatedAt,
     this.createdBy,
     this.updatedBy,
+    this.paymentMethod,
     this.bankName,
     this.bankAccountNumber,
     this.bankIban,
     this.bankAccountHolderName,
+    this.walletName,
+    this.walletNumber,
+    this.walletHolderName,
     this.schoolName,
     this.isSynced = false,
-  }) : firstName = firstName ?? (fullName != null && fullName.trim().isNotEmpty ? fullName.trim().split(RegExp(r'\s+')).first : ''),
-       lastName = lastName ?? (fullName != null && fullName.trim().isNotEmpty && fullName.trim().split(RegExp(r'\s+')).length > 1 ? fullName.trim().split(RegExp(r'\s+')).sublist(1).join(' ') : ''),
+  }) : firstName =
+           firstName ??
+           (fullName != null && fullName.trim().isNotEmpty
+               ? fullName.trim().split(RegExp(r'\s+')).first
+               : ''),
+       grandfatherName =
+           grandfatherName ??
+           (fullName != null &&
+                   fullName.trim().isNotEmpty &&
+                   fullName.trim().split(RegExp(r'\s+')).length >= 4
+               ? fullName.trim().split(RegExp(r'\s+'))[2]
+               : null),
+       lastName =
+           lastName ??
+           (fullName != null &&
+                   fullName.trim().isNotEmpty &&
+                   fullName.trim().split(RegExp(r'\s+')).length > 1
+               ? fullName.trim().split(RegExp(r'\s+')).last
+               : ''),
+       fatherName =
+           (fatherName.isEmpty &&
+                   fullName != null &&
+                   fullName.trim().isNotEmpty &&
+                   fullName.trim().split(RegExp(r'\s+')).length >= 3)
+               ? fullName.trim().split(RegExp(r'\s+'))[1]
+               : fatherName,
        siblings = siblings ?? [],
        documents = documents ?? [],
        createdAt = createdAt ?? DateTime.now(),
@@ -439,17 +509,27 @@ class Child {
     final Map<String, Map<String, String>> educationTranslations = {
       // None / Pre-school age
       'None': {
-        'ar': 'ما دون عمر الدراسة',
+        'ar': 'مرحلة ما قبل الدراسة',
         'en': 'Pre-school age',
         'tr': 'Okul öncesi yaş',
       },
       'بدون': {
-        'ar': 'ما دون عمر الدراسة',
+        'ar': 'مرحلة ما قبل الدراسة',
         'en': 'Pre-school age',
         'tr': 'Okul öncesi yaş',
       },
       'ما دون عمر الدراسة': {
-        'ar': 'ما دون عمر الدراسة',
+        'ar': 'مرحلة ما قبل الدراسة',
+        'en': 'Pre-school age',
+        'tr': 'Okul öncesi yaş',
+      },
+      'لا يوجد': {
+        'ar': 'مرحلة ما قبل الدراسة',
+        'en': 'Pre-school',
+        'tr': 'Okul Öncesi',
+      },
+      'مرحلة ما قبل الدراسة': {
+        'ar': 'مرحلة ما قبل الدراسة',
         'en': 'Pre-school age',
         'tr': 'Okul öncesi yaş',
       },
@@ -468,6 +548,8 @@ class Child {
       // University
       'University': {'ar': 'جامعي', 'en': 'University', 'tr': 'Üniversite'},
       'جامعي': {'ar': 'جامعي', 'en': 'University', 'tr': 'Üniversite'},
+      'College': {'ar': 'كلية', 'en': 'College', 'tr': 'Fakülte'},
+      'كلية': {'ar': 'كلية', 'en': 'College', 'tr': 'Fakülte'},
     };
 
     final translation = educationTranslations[educationLevel];
@@ -522,6 +604,67 @@ class Child {
   }
 
   /// ✅ الحصول على المدينة حسب اللغة
+  /// ✅ الحصول على دولة الولادة حسب اللغة
+  String? getBirthCountryByLanguage(String languageCode) {
+    if (birthCountry == null || birthCountry!.isEmpty) return birthCountry;
+    return getCountryByLanguage(languageCode) ?? birthCountry;
+  }
+
+  /// ✅ الحصول على مدينة الولادة حسب اللغة
+  String? getBirthCityByLanguage(String languageCode) {
+    if (birthCity == null || birthCity!.isEmpty) return birthCity;
+    final Map<String, Map<String, String>> cityTranslations = {
+      'غزة': {'ar': 'غزة', 'en': 'Gaza', 'tr': 'Gazze'},
+      'Gaza': {'ar': 'غزة', 'en': 'Gaza', 'tr': 'Gazze'},
+      'القدس': {'ar': 'القدس', 'en': 'Jerusalem', 'tr': 'Kudüs'},
+      'Jerusalem': {'ar': 'القدس', 'en': 'Jerusalem', 'tr': 'Kudüs'},
+      'رام الله': {'ar': 'رام الله', 'en': 'Ramallah', 'tr': 'Ramallah'},
+      'Ramallah': {'ar': 'رام الله', 'en': 'Ramallah', 'tr': 'Ramallah'},
+      'الخليل': {'ar': 'الخليل', 'en': 'Hebron', 'tr': 'El Halil'},
+      'Hebron': {'ar': 'الخليل', 'en': 'Hebron', 'tr': 'El Halil'},
+      'نابلس': {'ar': 'نابلس', 'en': 'Nablus', 'tr': 'Nablus'},
+      'Nablus': {'ar': 'نابلس', 'en': 'Nablus', 'tr': 'Nablus'},
+      'جنين': {'ar': 'جنين', 'en': 'Jenin', 'tr': 'Cenin'},
+      'Jenin': {'ar': 'جنين', 'en': 'Jenin', 'tr': 'Cenin'},
+      'طولكرم': {'ar': 'طولكرم', 'en': 'Tulkarm', 'tr': 'Tulkarm'},
+      'Tulkarm': {'ar': 'طولكرم', 'en': 'Tulkarm', 'tr': 'Tulkarm'},
+      'قلقيلية': {'ar': 'قلقيلية', 'en': 'Qalqilya', 'tr': 'Kalkilya'},
+      'Qalqilya': {'ar': 'قلقيلية', 'en': 'Qalqilya', 'tr': 'Kalkilya'},
+      'بيت لحم': {'ar': 'بيت لحم', 'en': 'Bethlehem', 'tr': 'Beytüllahim'},
+      'Bethlehem': {'ar': 'بيت لحم', 'en': 'Bethlehem', 'tr': 'Beytüllahim'},
+      'أريحا': {'ar': 'أريحا', 'en': 'Jericho', 'tr': 'Eriha'},
+      'Jericho': {'ar': 'أريحا', 'en': 'Jericho', 'tr': 'Eriha'},
+      'رفح': {'ar': 'رفح', 'en': 'Rafah', 'tr': 'Refah'},
+      'Rafah': {'ar': 'رفح', 'en': 'Rafah', 'tr': 'Refah'},
+      'خان يونس': {'ar': 'خان يونس', 'en': 'Khan Younis', 'tr': 'Han Yunus'},
+      'Khan Younis': {'ar': 'خان يونس', 'en': 'Khan Younis', 'tr': 'Han Yunus'},
+      'دمشق': {'ar': 'دمشق', 'en': 'Damascus', 'tr': 'Şam'},
+      'Damascus': {'ar': 'دمشق', 'en': 'Damascus', 'tr': 'Şam'},
+      'حلب': {'ar': 'حلب', 'en': 'Aleppo', 'tr': 'Halep'},
+      'Aleppo': {'ar': 'حلب', 'en': 'Aleppo', 'tr': 'Halep'},
+      'حمص': {'ar': 'حمص', 'en': 'Homs', 'tr': 'Humus'},
+      'Homs': {'ar': 'حمص', 'en': 'Homs', 'tr': 'Humus'},
+      'إدلب': {'ar': 'إدلب', 'en': 'Idlib', 'tr': 'İdlib'},
+      'Idlib': {'ar': 'إدلب', 'en': 'Idlib', 'tr': 'İdlib'},
+      'اسطنبول': {'ar': 'اسطنبول', 'en': 'Istanbul', 'tr': 'İstanbul'},
+      'Istanbul': {'ar': 'اسطنبول', 'en': 'Istanbul', 'tr': 'İstanbul'},
+      'أنقرة': {'ar': 'أنقرة', 'en': 'Ankara', 'tr': 'Ankara'},
+      'Ankara': {'ar': 'أنقرة', 'en': 'Ankara', 'tr': 'Ankara'},
+      'إزمير': {'ar': 'إزمير', 'en': 'Izmir', 'tr': 'İzmir'},
+      'Izmir': {'ar': 'إزمير', 'en': 'Izmir', 'tr': 'İzmir'},
+      'غازي عنتاب': {'ar': 'غازي عنتاب', 'en': 'Gaziantep', 'tr': 'Gaziantep'},
+      'Gaziantep': {'ar': 'غازي عنتاب', 'en': 'Gaziantep', 'tr': 'Gaziantep'},
+      'أورفة': {'ar': 'أورفة', 'en': 'Urfa', 'tr': 'Şanlıurfa'},
+      'Urfa': {'ar': 'أورفة', 'en': 'Urfa', 'tr': 'Şanlıurfa'},
+      'Şanlıurfa': {'ar': 'أورفة', 'en': 'Urfa', 'tr': 'Şanlıurfa'},
+    };
+    final translation = cityTranslations[birthCity];
+    if (translation != null) {
+      return translation[languageCode] ?? birthCity;
+    }
+    return birthCity;
+  }
+
   String? getCityByLanguage(String languageCode) {
     if (city == null || city!.isEmpty) return city;
 
@@ -616,6 +759,9 @@ class Child {
   Map<String, dynamic> toJson() => {
     'id': id,
     'first_name': firstName,
+    'grand_father_name': grandfatherName,
+    'birth_country': birthCountry,
+    'birth_city': birthCity,
     'last_name': lastName,
     'national_id': nationalId,
     'date_of_birth': dateOfBirth?.toIso8601String(),
@@ -623,12 +769,16 @@ class Child {
     'country': country,
     'city': city,
     'street': street,
+    'guardian_name': guardianName,
+    'guardian_address': guardianAddress,
     'guardian_relationship': guardianRelationship,
     'guardian_phone': guardianPhone,
     'education_level': educationLevel,
     'grade': grade,
     'university_year': universityYear,
+    'university_name': universityName,
     'university_college_name': universityCollegeName,
+    'college_specialization': collegeSpecialization,
     'sponsor_linked_at': sponsorLinkedAt?.toIso8601String(),
     'father_name': fatherName,
     'father_id_number': fatherIdNumber,
@@ -661,15 +811,36 @@ class Child {
     'updated_at': updatedAt.toIso8601String(),
     'created_by': createdBy,
     'updated_by': updatedBy,
+    'payment_method': paymentMethod,
     'bank_name': bankName,
     'bank_account_number': bankAccountNumber,
     'bank_iban': bankIban,
     'bank_account_holder_name': bankAccountHolderName,
+    'wallet_name': walletName,
+    'wallet_number': walletNumber,
+    'wallet_holder_name': walletHolderName,
     'school_name': schoolName,
     'is_synced': isSynced ? 1 : 0,
   };
 
   factory Child.fromJson(Map<String, dynamic> j) {
+    dynamic decodeJsonValue(dynamic value) {
+      if (value is String && value.isNotEmpty) {
+        return json.decode(value);
+      }
+      return value;
+    }
+
+    List<dynamic> decodeList(dynamic value) {
+      final decoded = decodeJsonValue(value);
+      return decoded is List ? decoded : <dynamic>[];
+    }
+
+    Map<String, dynamic>? decodeMap(dynamic value) {
+      final decoded = decodeJsonValue(value);
+      return decoded is Map ? Map<String, dynamic>.from(decoded) : null;
+    }
+
     DateTime parseDate(dynamic value, {DateTime? fallback}) {
       if (value == null) return fallback ?? DateTime.now();
       if (value is String)
@@ -682,10 +853,19 @@ class Child {
       return fallback ?? DateTime.now();
     }
 
+    final sponsorData = decodeMap(j['sponsor']);
+
     return Child(
       id: j['id']?.toString() ?? '',
       firstName:
           j['firstName']?.toString() ?? j['first_name']?.toString() ?? '',
+      grandfatherName:
+          j['grandfatherName']?.toString() ??
+          j['grand_father_name']?.toString() ??
+          j['grandFatherName']?.toString(),
+      birthCountry:
+          j['birthCountry']?.toString() ?? j['birth_country']?.toString(),
+      birthCity: j['birthCity']?.toString() ?? j['birth_city']?.toString(),
       lastName: j['lastName']?.toString() ?? j['last_name']?.toString() ?? '',
       nationalId: j['nationalId']?.toString() ?? j['national_id']?.toString(),
       dateOfBirth: parseDate(j['dateOfBirth'] ?? j['date_of_birth']),
@@ -696,6 +876,10 @@ class Child {
       country: j['country']?.toString(),
       city: j['city']?.toString(),
       street: j['street']?.toString(),
+      guardianName:
+          j['guardianName']?.toString() ?? j['guardian_name']?.toString(),
+      guardianAddress:
+          j['guardianAddress']?.toString() ?? j['guardian_address']?.toString(),
       guardianRelationship:
           j['guardianRelationship']?.toString() ??
           j['guardian_relationship']?.toString(),
@@ -706,9 +890,14 @@ class Child {
       grade: j['grade']?.toString(),
       universityYear:
           j['universityYear']?.toString() ?? j['university_year']?.toString(),
+      universityName:
+          j['universityName']?.toString() ?? j['university_name']?.toString(),
       universityCollegeName:
           j['universityCollegeName']?.toString() ??
           j['university_college_name']?.toString(),
+      collegeSpecialization:
+          j['collegeSpecialization']?.toString() ??
+          j['college_specialization']?.toString(),
       sponsorLinkedAt:
           (j['sponsorLinkedAt'] != null || j['sponsor_linked_at'] != null)
               ? parseDate(j['sponsorLinkedAt'] ?? j['sponsor_linked_at'])
@@ -786,21 +975,15 @@ class Child {
       specialNeeds:
           j['specialNeeds']?.toString() ?? j['special_needs']?.toString(),
       siblings:
-          (j['siblings'] is List)
-              ? (j['siblings'] as List)
-                  .map((e) => Map<String, dynamic>.from(e as Map))
-                  .toList()
-              : <Map<String, dynamic>>[],
+          decodeList(
+            j['siblings'],
+          ).whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList(),
       documents:
-          (j['documents'] is List)
-              ? (j['documents'] as List)
-                  .map((e) => Document.fromJson(Map<String, dynamic>.from(e)))
-                  .toList()
-              : <Document>[],
-      sponsor:
-          j['sponsor'] != null
-              ? Sponsor.fromJson(Map<String, dynamic>.from(j['sponsor']))
-              : null,
+          decodeList(j['documents'])
+              .whereType<Map>()
+              .map((e) => Document.fromJson(Map<String, dynamic>.from(e)))
+              .toList(),
+      sponsor: sponsorData == null ? null : Sponsor.fromJson(sponsorData),
       createdAt: parseDate(j['createdAt'] ?? j['created_at']),
       updatedAt: parseDate(
         j['updatedAt'] ?? j['updated_at'] ?? j['createdAt'] ?? j['created_at'],
@@ -808,6 +991,8 @@ class Child {
       ),
       createdBy: j['createdBy']?.toString() ?? j['created_by']?.toString(),
       updatedBy: j['updatedBy']?.toString() ?? j['updated_by']?.toString(),
+      paymentMethod:
+          j['paymentMethod']?.toString() ?? j['payment_method']?.toString(),
       bankName: j['bankName']?.toString() ?? j['bank_name']?.toString(),
       bankAccountNumber:
           j['bankAccountNumber']?.toString() ??
@@ -816,6 +1001,12 @@ class Child {
       bankAccountHolderName:
           j['bankAccountHolderName']?.toString() ??
           j['bank_account_holder_name']?.toString(),
+      walletName: j['walletName']?.toString() ?? j['wallet_name']?.toString(),
+      walletNumber:
+          j['walletNumber']?.toString() ?? j['wallet_number']?.toString(),
+      walletHolderName:
+          j['walletHolderName']?.toString() ??
+          j['wallet_holder_name']?.toString(),
       schoolName: j['schoolName']?.toString() ?? j['school_name']?.toString(),
       isSynced:
           j['is_synced'] == 1 ||

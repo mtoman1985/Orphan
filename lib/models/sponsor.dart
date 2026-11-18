@@ -2,16 +2,21 @@ import 'dart:convert';
 import '../services/multilang_transliterator.dart';
 
 class Sponsor {
-  String? id;
+  String id;
   String name;
   double amount;
   DateTime startDate;
   DateTime? endDate;
   String? endReason;
+  String sponsorCategory;
   int? organizationId;
   String? organizationName;
   String? linkedSponsorId;
   String currency;
+  String relationship;
+  String? email;
+  String? phone;
+  String? address;
   bool isOngoing;
   DateTime createdAt;
   DateTime updatedAt;
@@ -20,16 +25,21 @@ class Sponsor {
   bool isSynced;
 
   Sponsor({
-    this.id,
+    this.id = '',
     required this.name,
     required this.amount,
     required this.startDate,
     this.endDate,
     this.endReason,
+    this.sponsorCategory = 'individual',
     this.organizationId,
     this.organizationName,
     this.linkedSponsorId,
     this.currency = 'شيكل',
+    this.relationship = '',
+    this.email,
+    this.phone,
+    this.address,
     this.isOngoing = true,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -76,16 +86,21 @@ class Sponsor {
   }
 
   Map<String, dynamic> toJson() => {
-    if (id != null) 'id': id,
+    'id': id,
     'name': name,
     'amount': amount,
     'start_date': startDate.toIso8601String(),
     if (endDate != null) 'end_date': endDate!.toIso8601String(),
     if (endReason != null) 'end_reason': endReason,
+    'sponsor_category': sponsorCategory,
     if (organizationId != null) 'organization_id': organizationId,
     if (organizationName != null) 'organization_name': organizationName,
     if (linkedSponsorId != null) 'linked_sponsor_id': linkedSponsorId,
     'currency': currency,
+    'relationship': relationship,
+    if (email != null) 'email': email,
+    if (phone != null) 'phone': phone,
+    if (address != null) 'address': address,
     'is_ongoing': isOngoing ? 1 : 0,
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt.toIso8601String(),
@@ -107,7 +122,7 @@ class Sponsor {
     }
 
     return Sponsor(
-      id: j['id']?.toString() ?? j['sponsor_id']?.toString(),
+      id: j['id']?.toString() ?? j['sponsor_id']?.toString() ?? '',
       name: j['name']?.toString() ?? '',
       amount: (j['amount'] is num) ? (j['amount'] as num).toDouble() : 0.0,
       startDate: parseDate(j['startDate'] ?? j['start_date']),
@@ -116,15 +131,27 @@ class Sponsor {
               ? parseDate(j['endDate'] ?? j['end_date'])
               : null,
       endReason: j['endReason']?.toString() ?? j['end_reason']?.toString(),
+      sponsorCategory:
+          j['sponsorCategory']?.toString() ??
+          j['sponsor_category']?.toString() ??
+          'individual',
       organizationId: j['organizationId'] as int?,
-      organizationName: j['organizationName']?.toString(),
-      linkedSponsorId: j['linkedSponsorId']?.toString(),
+      organizationName:
+          j['organizationName']?.toString() ??
+          j['organization_name']?.toString(),
+      linkedSponsorId:
+          j['linkedSponsorId']?.toString() ??
+          j['linked_sponsor_id']?.toString(),
       currency: j['currency']?.toString() ?? 'شيكل',
+      relationship: j['relationship']?.toString() ?? '',
+      email: j['email']?.toString(),
+      phone: j['phone']?.toString(),
+      address: j['address']?.toString(),
       isOngoing:
-          (j['isOngoing'] is bool)
-              ? (j['isOngoing'] as bool)
-              : (j['isOngoing'] is int)
-              ? (j['isOngoing'] as int) != 0
+          (j['isOngoing'] ?? j['is_ongoing']) is bool
+              ? ((j['isOngoing'] ?? j['is_ongoing']) as bool)
+              : (j['isOngoing'] ?? j['is_ongoing']) is int
+              ? ((j['isOngoing'] ?? j['is_ongoing']) as int) != 0
               : true,
       createdAt: parseDate(j['createdAt'] ?? j['created_at']),
       updatedAt: parseDate(

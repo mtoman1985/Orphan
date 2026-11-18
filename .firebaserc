@@ -1,0 +1,22 @@
+{
+  "projects": {
+    "default": "orphanmanagement-c57f1"
+  },
+  "targets": {
+    "orphanmanagement-c57f1": {
+      "hosting": {
+        "orphan-ihsan-2026": [
+          "orphan-ihsan-2026"
+        ]
+      }
+    },
+    "orphan-ihsan-2026": {
+      "hosting": {
+        "orphan-ihsan-2026": [
+          "orphan-ihsan-2026"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

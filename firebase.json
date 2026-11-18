@@ -1,0 +1,59 @@
+{
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "orphanmanagement-c57f1",
+                    "appId": "1:505647722212:android:6c9d1d56ddfdc68aa446f1",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/firebase_options.dart": {
+                    "projectId": "orphanmanagement-c57f1",
+                    "configurations": {
+                        "android": "1:505647722212:android:6c9d1d56ddfdc68aa446f1",
+                        "ios": "1:505647722212:ios:dbfe5183693570dea446f1",
+                        "macos": "1:505647722212:ios:dbfe5183693570dea446f1",
+                        "windows": "1:505647722212:web:8b54d560d3ee4e06a446f1"
+                    }
+                }
+            }
+        }
+    },
+    "hosting": {
+        "target": "orphan-ihsan-2026",
+        "public": "build/web",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "rewrites": [
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ],
+        "headers": [
+            {
+                "source": "/service-worker.js",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "no-cache"
+                    }
+                ]
+            },
+            {
+                "source": "/index.html",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "no-cache"
+                    }
+                ]
+            }
+        ]
+    }
+}

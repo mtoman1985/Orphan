@@ -24,6 +24,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'pages/main/search_results_page.dart';
 import 'services/firebase_sync_service.dart';
+import 'services/web_cache_service.dart';
 import 'package:provider/provider.dart';
 import 'services/auth_service.dart';
 import 'pages/auth/login_page.dart';
@@ -255,9 +256,14 @@ class _OrphanDesktopAppState extends State<OrphanDesktopApp> {
   Future<void> _loadSavedLanguage() async {
     try {
       await SettingsService.init();
+      try {
+        await FirebaseSyncService().syncSharedSettingsFromFirebase();
+      } catch (e) {
+        debugPrint('Could not load shared settings from Firebase: $e');
+      }
 
       // Initialize Auth
-      await AuthService().init();
+      await AuthService().init(restoreSession: false);
 
       // استخدام لغة التقارير كلغة للواجهة
       final savedLangCode = await SettingsService.getDefaultReportLanguage();
@@ -365,18 +371,35 @@ class _DesktopShellState extends State<DesktopShell> {
   final List<Child> _children = [];
   final StorageService _storage = StorageService();
   late final CloudSyncService _cloudSync;
+  late final FirebaseSyncService _firebaseSync;
 
   @override
   void initState() {
     super.initState();
     _cloudSync = CloudSyncService();
+    _firebaseSync = FirebaseSyncService();
+    _firebaseSync.syncCompleted.addListener(_handleSyncCompleted);
+    _firebaseSync.lastSyncError.addListener(_handleSyncError);
+    _firebaseSync.startAutomaticSync();
     _loadChildren();
     _checkAutoBackup();
 
-    // Listen for background sync completion to refresh the list
-    FirebaseSyncService().syncCompleted.addListener(() {
-      if (mounted) _loadChildren();
-    });
+    if (kIsWeb) WebCacheService().startRealtimeUpdates();
+  }
+
+  void _handleSyncCompleted() {
+    if (mounted) _loadChildren();
+  }
+
+  void _handleSyncError() {
+    final error = _firebaseSync.lastSyncError.value;
+    if (!mounted || error == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('فشلت المزامنة التلقائية: $error'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   Future<void> _checkAutoBackup() async {
@@ -441,6 +464,9 @@ class _DesktopShellState extends State<DesktopShell> {
 
   @override
   void dispose() {
+    _firebaseSync.syncCompleted.removeListener(_handleSyncCompleted);
+    _firebaseSync.lastSyncError.removeListener(_handleSyncError);
+    _firebaseSync.stopAutomaticSync();
     _searchController.dispose();
     super.dispose();
   }
