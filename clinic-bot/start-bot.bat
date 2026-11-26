@@ -1,49 +1,71 @@
 @echo off
-chcp 65001 >nul
-setlocal enabledelayedexpansion
-cd /d %~dp0
+setlocal
+cd /d "%~dp0"
+title Clinic WhatsApp Bot
 echo ==========================================
-echo   بوت عيادة الأسنان - تشغيل
+echo   Clinic WhatsApp Bot
 echo ==========================================
 echo.
 
 where node >nul 2>nul
-if errorlevel 1 (
-  echo [X] Node.js غير مثبت. حمّله من https://nodejs.org ثم أعد المحاولة.
-  pause
-  exit /b 1
-)
+if errorlevel 1 goto NONODE
 
-if not exist .env (
-  echo [X] ملف .env غير موجود.
-  echo     انسخ .env.example وسمّه .env ثم املأ القيم بداخله.
-  pause
-  exit /b 1
-)
+if not exist ".env" goto NOENV
 
-rem --- إغلاق أي نسخة قديمة تعمل على المنفذ 7861 ---
-set FOUND=
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr /R /C:"LISTENING" ^| findstr ":7861"') do (
-  set FOUND=1
-  echo [i] إغلاق نسخة قديمة من البوت (PID %%a)...
+findstr /B /C:"MONGODB_URI=" ".env" >nul 2>nul
+if errorlevel 1 goto NOURI
+
+node -e "require('dotenv')" >nul 2>nul
+if errorlevel 1 goto INSTALL
+
+if not exist "node_modules\whatsapp-web.js" goto INSTALL
+
+goto KILLPORT
+
+:INSTALL
+echo [i] Installing packages, this may take a few minutes...
+call npm install --strict-ssl=false
+echo.
+
+:KILLPORT
+set "FOUND="
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr /C:"LISTENING" ^| findstr ":7861"') do (
+  set "FOUND=1"
+  echo [i] Closing old bot instance, PID %%a
   taskkill /F /PID %%a >nul 2>nul
 )
 if defined FOUND (
   timeout /t 2 /nobreak >nul
-  echo [OK] تم إغلاق النسخة القديمة.
+  echo [OK] Old instance closed.
   echo.
 )
 
-if not exist node_modules (
-  echo [i] تثبيت الحزم (قد يستغرق عدة دقائق أول مرة)...
-  call npm install
-  echo.
-)
-
-echo [i] تشغيل البوت... افتح المتصفح على: http://localhost:7861
+echo [i] Starting bot... open http://localhost:7861 in your browser
 echo.
 node index.js
-
 echo.
-echo [i] توقف البوت. اضغط أي زر للإغلاق.
+echo [i] Bot stopped. Press any key to close this window.
 pause >nul
+goto :eof
+
+:NONODE
+echo [X] Node.js not found. Install it from https://nodejs.org
+echo.
+pause
+goto :eof
+
+:NOENV
+echo [X] File .env not found in this folder:
+echo     %~dp0
+echo     Copy .env.example to .env and fill in the values.
+echo.
+pause
+goto :eof
+
+:NOURI
+echo [X] The line MONGODB_URI=... is missing in .env
+echo     Open .env with Notepad and add one line like:
+echo     MONGODB_URI=mongodb+srv://user:pass@cluster0.xxxxx.mongodb.net/
+echo.
+pause
+goto :eof
