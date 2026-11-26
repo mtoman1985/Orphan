@@ -1,0 +1,10 @@
+# أسرار وملفات تشغيل — لا تُرفع إلى GitHub أبداً
+.env
+credentials.json
+token.json
+node_modules/
+.wwebjs_auth/
+.reset_done
+qr_code.txt
+qr_render.png
+*.log
