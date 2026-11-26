@@ -74,6 +74,15 @@ echo.
 echo     Note: the "npm warn ... install-scripts" lines are harmless.
 echo.
 
+if exist "%USERPROFILE%\.cache\puppeteer" goto CHROMEOK
+if exist "%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe" goto CHROMEOK
+echo     Downloading Chrome for WhatsApp Web (about 150 MB, once only)...
+call npx --yes puppeteer browsers install chrome
+echo.
+:CHROMEOK
+echo     Browser is ready.
+echo.
+
 echo [5/5] Starting the bot...
 echo     Open http://localhost:7861 in your browser.
 echo     Keep this window open. Press Ctrl+C to stop.
