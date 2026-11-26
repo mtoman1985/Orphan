@@ -1,4 +1,10 @@
-try { require('dotenv').config(); } catch (e) { /* dotenv اختياري: يمكن تمرير المتغيرات من البيئة مباشرة */ }
+// قراءة المتغيرات من ملف .env الموجود بجانب هذا الملف
+try {
+    const envRes = require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+    if (envRes.error) console.warn('⚠️ تعذّر قراءة ملف .env:', envRes.error.message);
+} catch (e) {
+    console.warn('⚠️ حزمة dotenv غير مثبتة — نفّذ npm install، أو مرّر المتغيرات من البيئة مباشرة.');
+}
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 const { Client, RemoteAuth, LocalAuth, MessageMedia } = require('whatsapp-web.js');
@@ -1751,13 +1757,29 @@ app.get('/qr', (req, res) => {
 });
 
 const PORT = process.env.PORT || 7861; 
-app.listen(PORT, () => { console.log(`🌍 نظام الاستقبال يعمل بنجاح على البورت ${PORT}`); });
+const server = app.listen(PORT, () => { console.log(`🌍 نظام الاستقبال يعمل بنجاح على البورت ${PORT}`); });
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`❌ المنفذ ${PORT} مشغول: نسخة أخرى من البوت تعمل بالفعل.`);
+        console.error('   أغلق النسخة القديمة (أو نفّذ: taskkill /F /IM node.exe على ويندوز) ثم أعد التشغيل.');
+        console.error('   أو غيّر المنفذ في ملف .env: PORT=7862');
+        lastError = `المنفذ ${PORT} مشغول — نسخة أخرى من البوت تعمل`;
+        botStatus = `❌ المنفذ ${PORT} مشغول (نسخة أخرى تعمل)`;
+        // إيقاف العملية كي لا يظل السجل يتكرر بلا فائدة
+        setTimeout(() => process.exit(1), 1500);
+    } else {
+        console.error('❌ خطأ في تشغيل خادم الويب:', err.message);
+        lastError = err.message;
+    }
+});
 
 // ==========================================
 // 🔌 الاتصال بقاعدة بيانات MongoDB وتجهيز RemoteAuth
 // (ضع الرابط في Render ← Environment باسم MONGODB_URI ولا تكتبه في الكود)
 // ==========================================
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = (process.env.MONGODB_URI || '').trim();
+// دعم الاسم البديل MONGO_URI (يُستخدم في بعض المنصات)
+if (!MONGODB_URI && process.env.MONGO_URI) process.env.MONGODB_URI = process.env.MONGO_URI.trim();
 
 // وضع خفيف (افتراضي): يقلل استهلاك الذاكرة. للتعطيل ضع LITE_MODE=0
 const LITE_ARGS = (process.env.LITE_MODE === '0') ? [] : [

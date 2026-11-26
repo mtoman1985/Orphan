@@ -79,11 +79,18 @@ pm2 logs clinic-bot   # متابعة السجل
 
 ## 6) استكشاف الأخطاء
 
+> 🧰 **قبل أي شيء:** شغّل أداة الفحص داخل مجلد `clinic-bot`:
+> ```
+> node check-connection.js
+> ```
+> تخبرك بالضبط أين المشكلة (ملف `.env`، الرابط، DNS، المنفذ، أو الاتصال).
+
 | المشكلة | الحل |
 |---|---|
+| `متغير MONGODB_URI غير مضبوط` | ١) تأكد أن ملف `.env` **موجود بجانب `index.js`** (وليس داخل مجلد آخر) ٢) نفّذ `npm install` (يجب أن تُثبَّت حزمة `dotenv`) ٣) السطر في `.env` بلا مسافات وعلامات تنصيص: `MONGODB_URI=mongodb+srv://...` |
+| `EADDRINUSE :::7861` | نسخة أخرى من البوت تعمل. الحل: `taskkill /F /IM node.exe` (ويندوز) أو استخدم `start-bot.bat` الذي يغلق النسخة القديمة تلقائياً. أو غيّر المنفذ: `PORT=7862` في `.env` |
+| `فشل الاتصال بـ MongoDB` | تحقق من: كلمة المرور في الرابط، وسماح IP في Atlas (**Network Access** — يمكنك استخدام `0.0.0.0/0`)، وأن الكلاستر يعمل. شغّل `node check-connection.js` لمعرفة السبب بدقة |
+| `querySrv EREFUSED` / `ENOTFOUND` | شبكة جهازك تحجب استعلامات DNS من نوع SRV. الحلول: ١) غيّر DNS إلى `8.8.8.8` و`8.8.4.4` ثم `ipconfig /flushdns` ٢) جرّب هوت سبوت الجوال ٣) استخدم رابط `mongodb://` المباشر من Atlas ← Connect ← Drivers |
 | `Cannot find module ...` | نفّذ `npm install` داخل مجلد `clinic-bot` |
 | خطأ Chromium / مكتبات مفقودة (لينكس) | ثبّت مكتبات Chromium كما في قسم 1 |
-| `فشل الاتصال بـ MongoDB` / `querySrv EREFUSED` | السبب الأول: عنوان IP جهازك غير مسموح في Atlas. الحل: افتح [cloud.mongodb.com](https://cloud.mongodb.com) ← اختر المشروع ← **Network Access** ← **Add IP Address** ← **Allow Access From Anywhere** ← Confirm، انتظر دقيقتين ثم أعد تشغيل البوت. تحقق أيضاً أن الكلاستر غير موقوف مؤقتاً (Clusters ← Resume إن ظهر). للفحص السريع شغّل: `node check-connection.js` |
-| `MONGODB_URI` غير مضبوط | أنشئ ملف `.env` من `.env.example` واملأ القيم ثم أعد التشغيل |
-| البوت يعمل لكن لا يصل واتساب | تحقق من الإنترنت، ثم افتح `http://localhost:7861` لقراءة رسالة الخطأ |
-| المنفذ مشغول | غيّر `PORT` في `.env` أو أوقف البرنامج الذي يستخدم 7861 |
+| البوت يعمل لكن لا يصل واتساب | افتح `http://localhost:7861` لقراءة رسالة الخطأ، وتأكد من الإنترنت |
