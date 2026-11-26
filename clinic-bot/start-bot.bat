@@ -12,7 +12,7 @@ if errorlevel 1 goto NONODE
 
 if not exist ".env" goto NOENV
 
-findstr /B /C:"MONGODB_URI=" ".env" >nul 2>nul
+findstr /R /C:"^MONGODB_URI=mongodb" ".env" >nul 2>nul
 if errorlevel 1 goto NOURI
 
 node -e "require('dotenv')" >nul 2>nul
@@ -63,7 +63,7 @@ pause
 goto :eof
 
 :NOURI
-echo [X] The line MONGODB_URI=... is missing in .env
+echo [X] MONGODB_URI is missing or empty in .env
 echo     Open .env with Notepad and add one line like:
 echo     MONGODB_URI=mongodb+srv://user:pass@cluster0.xxxxx.mongodb.net/
 echo.
