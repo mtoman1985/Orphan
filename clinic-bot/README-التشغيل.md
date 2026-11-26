@@ -83,6 +83,7 @@ pm2 logs clinic-bot   # متابعة السجل
 |---|---|
 | `Cannot find module ...` | نفّذ `npm install` داخل مجلد `clinic-bot` |
 | خطأ Chromium / مكتبات مفقودة (لينكس) | ثبّت مكتبات Chromium كما في قسم 1 |
-| `MongoDB connection failed` | تحقق من `MONGODB_URI` ومن أن IP جهازك مسموح في MongoDB Atlas (Network Access) |
+| `فشل الاتصال بـ MongoDB` / `querySrv EREFUSED` | السبب الأول: عنوان IP جهازك غير مسموح في Atlas. الحل: افتح [cloud.mongodb.com](https://cloud.mongodb.com) ← اختر المشروع ← **Network Access** ← **Add IP Address** ← **Allow Access From Anywhere** ← Confirm، انتظر دقيقتين ثم أعد تشغيل البوت. تحقق أيضاً أن الكلاستر غير موقوف مؤقتاً (Clusters ← Resume إن ظهر). للفحص السريع شغّل: `node check-connection.js` |
+| `MONGODB_URI` غير مضبوط | أنشئ ملف `.env` من `.env.example` واملأ القيم ثم أعد التشغيل |
 | البوت يعمل لكن لا يصل واتساب | تحقق من الإنترنت، ثم افتح `http://localhost:7861` لقراءة رسالة الخطأ |
 | المنفذ مشغول | غيّر `PORT` في `.env` أو أوقف البرنامج الذي يستخدم 7861 |
